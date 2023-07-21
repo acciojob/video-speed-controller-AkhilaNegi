@@ -1,53 +1,44 @@
-// Get the necessary elements
-const video = document.querySelector('.player__video');
-const progressBar = document.querySelector('.progress__filled');
-const playButton = document.querySelector('.player__button');
-const volumeInput = document.querySelector('input[name="volume"]');
-const playbackSpeedInput = document.querySelector('input[name="playbackRate"]');
-const skipBackButton = document.querySelector('.player__button[data-skip="-10"]');
-const skipForwardButton = document.querySelector('.player__button[data-skip="25"]');
+const player = document.querySelector(".player");
+const video = player.querySelector(".viewer");
+const progress = player.querySelector(".progress");
+const progressBar = player.querySelector(".progress__filled");
+const toggle = player.querySelector(".toggle");
+const skipButtons = player.querySelectorAll("[data-skip]");
+const ranges = player.querySelectorAll(".player__slider");
 
-// Update progress bar as the video plays
-function updateProgressBar() {
-  const progress = (video.currentTime / video.duration) * 100;
-  progressBar.style.flexBasis = `${progress}%`;
+toggle.addEventListener("click", togglePlay);
+
+video.addEventListener("timeupdate", handlerProgress);
+
+for (let skip of skipButtons) {
+  skip.addEventListener("click", forwardOrBackward);
 }
 
-// Play or pause the video
+for (let range of ranges) {
+  range.addEventListener("change", handleRangeUpdate);
+}
+
 function togglePlay() {
   if (video.paused) {
     video.play();
-    playButton.textContent = '❚ ❚';
+    toggle.innerText = "❚ ❚";
   } else {
     video.pause();
-    playButton.textContent = '►';
+    toggle.innerText = "►";
   }
 }
 
-// Set the volume of the video
-function setVolume() {
-  video.volume = volumeInput.value;
+function handlerProgress() {
+  const currentProgress = (video.currentTime / video.duration) * 100;
+  progressBar.style.flexBasis = `${currentProgress}%`;
 }
 
-// Set the playback speed of the video
-function setPlaybackSpeed() {
-  video.playbackRate = playbackSpeedInput.value;
+function forwardOrBackward(event) {
+  let element = event.target;
+  video.currentTime += parseFloat(element.attributes["data-skip"].value);
 }
 
-// Skip backward by 10 seconds
-function skipBackward() {
-  video.currentTime -= 10;
+function handleRangeUpdate(event) {
+  let element = event.target;
+  video[element.name] = element.value;
 }
-
-// Skip forward by 25 seconds
-function skipForward() {
-  video.currentTime += 25;
-}
-
-// Event listeners
-video.addEventListener('timeupdate', updateProgressBar);
-playButton.addEventListener('click', togglePlay);
-volumeInput.addEventListener('input', setVolume);
-playbackSpeedInput.addEventListener('input', setPlaybackSpeed);
-skipBackButton.addEventListener('click', skipBackward);
-skipForwardButton.addEventListener('click', skipForward);
